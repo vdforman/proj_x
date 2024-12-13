@@ -5,7 +5,7 @@ df = pd.read_csv('vehicles_us.csv')
 
 st.header("Project 4", anchor="Vehicles")
 
-
+import matplotlib as plt
 #fdf = pd.read_csv('vehicles_us.csv')
 df['is_4wd'] = df['is_4wd'].fillna(0)
 df['is_4wd'] = df['is_4wd'].astype('int')
