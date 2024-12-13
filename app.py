@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 df = pd.read_csv('vehicles_us.csv')
 
-st.header("Project 4", anchor="Vehicles", divider='red')
+st.header("Project 4", anchor="Vehicles")
 
 import matplotlib as plt
 #fdf = pd.read_csv('vehicles_us.csv')
