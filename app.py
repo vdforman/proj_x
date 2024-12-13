@@ -1,92 +1,87 @@
-import streamlit as st
 import pandas as pd
+import numpy as np
+import streamlit as st
 import plotly.express as px
-df = pd.read_csv('vehicles_us.csv')
 
-st.header("Project 4", anchor="Vehicles")
+# Load and clean data
+data = pd.read_csv("vehicles_us.csv")
+data['is_4wd'] = data['is_4wd'].fillna(0).astype(int)
+data['date_posted'] = pd.to_datetime(data['date_posted'], format='%Y-%m-%d')
+data['model_year'] = data['model_year'].fillna("not specified")
+data['paint_color'] = data['paint_color'].fillna("not specified")
+data['odometer'] = data['odometer'].fillna(np.nan)
+data['cylinders'] = data['cylinders'].fillna("not specified")
 
+# Ensure all values in model_year are strings for consistency
+data["model_year"] = pd.to_numeric(data["model_year"], errors="coerce")  # Convert to numeric, set invalid to NaN
+model_years = sorted(data["model_year"].dropna().unique())  # Drop NaNs and sort
 
-#fdf = pd.read_csv('vehicles_us.csv')
-df['is_4wd'] = df['is_4wd'].fillna(0)
-df['is_4wd'] = df['is_4wd'].astype('int')
-df['date_posted'] = pd.to_datetime(df['date_posted'] ,format='%Y-%m-%d')
-df['model_year'] = df['model_year'].fillna("not specified")
-df['paint_color'] = df['paint_color'].fillna("not specified")
-df['odometer'] = df['odometer'].fillna("not specified")
-df['cylinders'] = df['cylinders'].fillna("not specified")
-df_suv = df[df['type'] == 'SUV']
-df_pickup = df[df['type'] == 'pickup']
-df_sedan = df[df['type'] == 'sedan']
-df_truck = df[df['type'] == 'truck']
-df_coupe = df[df['type'] == 'coupe']
-df_van = df[df['type'] == 'van']
-df_convertible = df[df['type'] == 'convertible']
-df_hatchback = df[df['type'] == 'hatchback']
-df_wagon = df[df['type'] == 'wagon']
-df_minivan = df[df['type'] == 'mini_van']
-df_offroad = df[df['type'] == 'offroad']
-df_bus = df[df['type'] == 'bus']
-df_type_other = df[df['type'] == 'other']
+# Streamlit headers and data viewer
+st.header("Vehicles Data Viewer")
+st.dataframe(data)
 
-suv = st.checkbox("SUV", value=True)
-pickup = st.checkbox("Pickup")
-sedan = st.checkbox("Sedan")
-truck = st.checkbox("Truck")
-coupe = st.checkbox("Coupe")
-van = st.checkbox("Van")
-convertible = st.checkbox("Convertible")
-hatchback = st.checkbox("Hatchback")
-wagon = st.checkbox("Wagon")
-minivan = st.checkbox("Minivan")
-offroad = st.checkbox("Offroad")
-bus = st.checkbox("Bus")
-other = st.checkbox("Other")
+# Histogram: Most Valuable Vehicle Type
+st.header("Most Valuable Vehicle Type")
+price_vs_vehicle_type_hist = px.histogram(
+    data,
+    x="type",
+    y="price",
+    title="Most Valuable Vehicle Type",
+    labels={"type": "Vehicle Type", "price": "Vehicle Price ($)"},
+    histfunc='avg',
+    color="type"
+)
+st.plotly_chart(price_vs_vehicle_type_hist)
 
-if suv :
-    print(df_suv['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price'))
+# Scatter Plot: Odometer and Price Correlation
+st.header("Odometer and Price Correlation")
+filtered_data = data[data['odometer'].notna()]
+odometer_vs_price_scatter = px.scatter(
+    filtered_data,
+    x="odometer",
+    y="price",
+    title="Odometer and Price Correlation",
+    labels={"odometer": "Odometer (Mileage)", "price": "Vehicle Price ($)"},
+    opacity=0.6
+)
+st.plotly_chart(odometer_vs_price_scatter)
 
-if pickup :
-    print(df_pickup['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
+# Compare Price Distribution Between Model Years
+st.header("Compare Price Distribution Between Model Years")
 
-if sedan :
-    print(df_sedan['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
+# Dropdowns for selecting years
+year_1 = st.selectbox("Select Year 1", model_years, index=0)
+year_2 = st.selectbox("Select Year 2", model_years, index=1)
 
-if truck :
-    print(df_truck['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
+# Filter data for the selected years
+selected_years = data[data["model_year"].isin([year_1, year_2])]
 
-if coupe :
-    print(df_coupe['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
+# Checkbox to normalize histogram
+normalize = st.checkbox("Normalize histogram", value=True)
+histnorm = "percent" if normalize else None
 
-if van :
-    print(df_van['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
+# Create a histogram to compare price distribution between selected model years
+price_comparison_hist = px.histogram(
+    selected_years,
+    x="price",
+    color="model_year",
+    nbins=30,
+    histnorm=histnorm,
+    barmode="overlay",
+    title="Price Distribution Comparison Between Model Years",
+    labels={"price": "Vehicle Price ($)", "model_year": "Model Year"}
+)
+st.plotly_chart(price_comparison_hist)
 
-if convertible :
-    print(df_convertible['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-if hatchback :
-    print(df_hatchback['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-if wagon :
-    print(df_wagon['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-if minivan :
-    print(df_minivan['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-if offroad :
-    print(df_offroad['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-if bus :
-    print(df_bus['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-if other :
-    print(df_type_other['price'].plot(kind='hist', bins=30, title='Type of Vehicle Price Availability', xlabel='Price', alpha=0.8))
-
-color_bar = df.groupby('paint_color')['price'].count().plot(kind='bar', title='Color Availability', x='paint_color', ylabel= "Count")
-type_bar = df.groupby("type")['price'].count().plot(kind='bar', title='Vehicle Type Availability', x='type', ylabel='Count', color='red')
-df_proper_odo = df[df['odometer'] != 'not specified']
-odo_price_scat = df_proper_odo.loc[:,['odometer','price']].plot(kind='scatter', title='Odometer vs Price', x='odometer', xlabel='Miles', y='price', alpha=0.5)
-
-
-scat = px.scatter(df_proper_odo, x='odometer', y='price')
-st.plotly_chart(scat)
+# Bar Plot: Paint Color Availability
+st.header("Paint Color Distribution")
+paint_color_bar = px.bar(
+    data.groupby('paint_color')['price'].count().reset_index().rename(columns={'price': 'Count'}),
+    x="paint_color",
+    y="Count",
+    title="Paint Color Distribution",
+    labels={"paint_color": "Paint Color", "Count": "Number of Vehicles"},
+    color="paint_color"
+)
+st.plotly_chart(paint_color_bar)
 
