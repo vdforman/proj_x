@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-df = pd.read_csv('C:/Users/GOAT/python/projects/proj_x/proj_x/.venv/Scripts/vehicles_us.csv')
+df = pd.read_csv('vehicles_us.csv')
 
 st.header("Project 4", anchor="Vehicles", divider='red')
 
